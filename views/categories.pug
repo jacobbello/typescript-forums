@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  ul#categories
+    each category in categories
+      li.category
+        a.category-title(href='#')= category.name
+        p.category-description= category.description

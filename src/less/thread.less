@@ -1,0 +1,39 @@
+@post-header-color: black;
+@post-text-color: white;
+@thread-bg: #333;
+@post-author-color: white;
+
+#posts {
+  background-color: @thread-bg;
+  border-radius: 5px;
+  color: white;
+  & > li {
+    list-style-type: none;
+  }
+  padding: 0px;
+}
+
+.post {
+  border-bottom: 1px solid white;
+  padding: 5px 30px;
+}
+
+.post-header {
+  color: @post-header-color;
+  font-weight: bolder;
+  font-size: 24px;
+}
+
+.post-author {
+  color: @post-author-color;
+  text-decoration: none;
+  &:hover, &:focus {
+    text-decoration: none;
+    color: darken(@post-author-color, 20%);
+  }
+}
+
+.author {
+  width: 64px;
+  text-align: center;
+}

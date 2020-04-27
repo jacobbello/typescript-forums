@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h3.category-header= title
+  ul#threads
+    each thread in threads
+      li.thread
+        a.thread-title(href='#')= thread.title
+        p.thread-author= thread.authorName

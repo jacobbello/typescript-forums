@@ -1,0 +1,33 @@
+@category-title-color: white;
+@thread-title-color: white;
+@thread-author-color: white;
+@category-bg: #333;
+
+#threads {
+  background-color: @category-bg;
+  border-radius: 5px;
+  color: white;
+  & > li {
+    list-style-type: none;
+  }
+  padding: 0px;
+}
+
+.thread {
+  border-bottom: 1px solid white;
+  padding: 5px 30px;
+}
+
+.thread-title {
+  color: @thread-title-color;
+  font-weight: bolder;
+  font-size: 24px;
+  &:hover, &:focus {
+    text-decoration: none;
+    color: darken(@thread-title-color, 20%);
+  }
+}
+
+.thread-author {
+  color: @thread-author-color;
+}

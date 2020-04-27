@@ -1,0 +1,10 @@
+{
+  "port": 8000,
+  "database": {
+    "type": "memory",
+    "username": "",
+    "password": "",
+    "url": "",
+    "poolSize": 10
+  }
+}

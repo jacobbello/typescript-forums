@@ -1,0 +1,135 @@
+//out: ../../public/css/style.css, compress: true
+@primary: orange;
+@secondary: #22c;
+@success: #5cb85c;
+@danger: #d9534f;
+@warning: #cccc00;
+@info: #5bc0de;
+@light: gray;
+@dark: #333;
+@styles: primary, secondary, success, danger, warning, info, light, dark;
+@length: length(@styles);
+
+@import 'categories.less';
+@import 'category.less';
+@import 'thread.less';
+
+a {
+  cursor:pointer;
+}
+
+body {
+  margin-top: 45px;
+}
+
+.bg-inverse {
+    background-color: darkcyan !important;
+}
+
+.navbar-brand {
+    padding: .5rem 0rem;
+    margin-left: 1rem;
+}
+
+.navbar-inverse {
+    padding: 0px 5px;
+}
+
+.nav-item {
+    border-radius: 5px;
+    &:hover {
+      background-color: #007575;
+    }
+}
+
+.show>.dropdown-menu {
+    background-color: #007575;
+}
+
+.dropdown-item {
+    color: white;
+    &:hover {
+        color: white;
+        background-color: #006565;
+    }
+}
+* {
+    transition: all 150ms linear;
+}
+
+.jumbotron {
+    background-color: #002f2f;
+    color: white;
+}
+
+.btn-variation(@index) when (@index > 0) {
+  .btn-variation((@index)-1);
+  @style: extract(@styles, @index);
+  .btn-@{style} {
+    background-color: @@style;
+    border-color: @@style;
+    color: white;
+    &:hover {
+      background-color: darken(@@style, 10%);
+      border-color: darken(@@style, 10%);
+      color: darken(white, 10%);
+    }
+  }
+}
+.btn-variation(@length);
+
+.btn-outline-variation(@index) when (@index > 0) {
+  .btn-outline-variation((@index)-1);
+  @style: extract(@styles, @index);
+  .btn-outline-@{style} {
+    background-color: white;
+    border-color: @@style;
+    color: @@style;
+    &:hover {
+      background-color: darken(@@style, 10%);
+      border-color: darken(@@style, 10%);
+      color: darken(white, 10%);
+    }
+  }
+}
+.btn-outline-variation(@length);
+
+.alert-variation(@index) when (@index > 0) {
+  .alert-variation((@index)-1);
+  @style: extract(@styles, @index);
+  .alert-@{style} {
+    background-color: lighten(@@style, 30%);
+    border-color: lighten(@@style, 10%);
+    color: darken(@@style, 10%);
+  }
+}
+.alert-variation(@length);
+
+.badge-variation(@index) when (@index > 0) {
+  .badge-variation((@index)-1);
+  @style: extract(@styles, @index);
+  .badge-@{style} {
+    background-color: @@style;
+  }
+}
+.badge-variation(@length);
+
+.navbar-toggler-icon {
+    cursor: pointer;
+    &:focus {
+        outline: none;
+    }
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-dark {
+  background: @dark;
+  color: white;
+}
+
+.btn {
+  cursor: pointer;
+}
