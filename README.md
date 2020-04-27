@@ -1,7 +1,7 @@
-#Typescript Forums
+Typescript Forums
 Forum software using node.js, express, and Typescript
 
-##Todo
+Todo
 - Post/Thread creation
 - Captcha
 - Admin Panel
