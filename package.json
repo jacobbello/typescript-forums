@@ -21,7 +21,7 @@
     "typescript": "^3.6.3"
   },
   "dependencies": {
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.0.0",
     "config": "^3.3.1",
     "connect-mongo": "^3.0.0",
     "cookie-parser": "^1.4.4",
