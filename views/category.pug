@@ -1,9 +1,10 @@
 extends layout
 
 block content
-  h3.category-header= title
+  h3.category-header=category.name
+  h5.category-description=category.descriptoin
   ul#threads
     each thread in threads
       li.thread
-        a.thread-title(href='#')= thread.title
-        p.thread-author= thread.authorName
+        a.thread-title(href='#')=thread.title
+        p.thread-author=thread.authorName

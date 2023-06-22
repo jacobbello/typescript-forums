@@ -1,179 +1,98 @@
-import {Database, User, Post, Thread, Category, DatabaseOptions} from './database';
-import {MongoClient, FindAndModifyWriteOpResultObject} from 'mongodb';
+import { Database, User, Post, Thread, Category, DatabaseOptions, UserNotFoundError, CategoryNotFoundError, IDType, ThreadNotFoundError, PostNotFoundError } from './database';
+import { MongoClient, FindAndModifyWriteOpResultObject } from 'mongodb';
 
-export class Mongo implements Database {  deleteCategory: (id: number) => Promise<void>;
+export class Mongo implements Database {
   connection: MongoClient;
 
-  constructor(options: DatabaseOptions) {
-    MongoClient.connect(options.url, options).then((db: MongoClient) => {
-      this.connection = db;
-    }).catch(console.error);
+  async connect(options: DatabaseOptions) {
+    this.connection = await MongoClient.connect(options.url, options);
   }
 
-  deleteThread(id: number): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      let db= this.connection.db('forums');
-      let threads = db.collection('threads');
-      threads.deleteOne({id: id}).then(() => {
-        let posts = db.collection('posts');
-        posts.deleteMany({thread: id}).then(() => {
-          resolve();
-        }).catch(reject);
-      }).catch(reject);
-    });
+  async deleteThread(id: number) {
+    let db = this.connection.db('forums');
+    await db.collection('threads').deleteOne({ id: id })
+    await db.collection('posts').deleteMany({ thread: id });
   }
 
-  deletePost(id: number): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      let db= this.connection.db('forums');
-      let posts = db.collection('posts');
-      posts.deleteOne({id: id}).then(() => {
-        resolve();
-      }).catch(reject);
-    });
+  async deleteCategory(id: number) {
+    let db = this.connection.db('forums');
+    let categories = db.collection('categories');
+    await categories.deleteOne({ id: id });
+    let threads = await db.collection('threads').find({ category: id }).toArray();
+    for (const thread of threads) {
+      await this.deleteThread(thread.id);
+    }
   }
 
-  insertCategory(category: Category): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let categories = db.collection('categories');
-      categories.insertOne(category).then(() => {
-        resolve();
-      }).catch(reject);
-    });
+  async deletePost(id: number) {
+    await this.connection.db('forums').collection('posts').deleteOne({ id: id });
   }
 
-  insertThread(thread: Thread): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let threads = db.collection('threads');
-      threads.insertOne(thread).then(() => {
-        let categories = db.collection('categories');
-        categories.updateOne({id: thread.category}, {$addToSet: {threads: thread.id}}).then(() => {
-          resolve();
-        }).catch(reject);
-      }).catch(reject);
-    });
+  async insertCategory(category: Category) {
+    await this.connection.db('forums').collection('categories').insertOne(category);
   }
 
-  insertPost(post: Post): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let posts = db.collection('posts');
-      posts.insertOne(post).then(() => {
-        let threads = db.collection('threads');
-        threads.updateOne({id: post.thread}, {$addToSet: {posts: post.id}}).then(() => {
-          resolve();
-        }).catch(reject);
-      });
-    });
+  async insertThread(thread: Thread) {
+    let db = this.connection.db('forums');
+    let threads = db.collection('threads');
+    await threads.insertOne(thread);
+    let categories = db.collection('categories');
+    await categories.updateOne({ id: thread.category }, { $addToSet: { threads: thread.id } });
   }
 
-  getCategories(): Promise<Category[]> {
-    return new Promise<Category[]>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let categories = db.collection('categories');
-      categories.find().toArray().then((results: any[]) => {
-        if (results) resolve(results as Category[]);
-        else reject('No categories found');
-      }).catch(reject);
-    });
+  async insertPost(post: Post) {
+    let db = this.connection.db('forums');
+    let posts = db.collection('posts');
+    await posts.insertOne(post);
+    let threads = db.collection('threads');
+    await threads.updateOne({ id: post.thread }, { $addToSet: { posts: post.id } });
   }
 
-  getCategory(id: number): Promise<Category> {
-    return new Promise<Category>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let categories = db.collection('categories');
-      categories.findOne({id: id}).then((c: any) => {
-        if (c) resolve(c as Category);
-        else reject('Category not found');
-      }).catch(reject);
-    });
+  async getCategories() {
+    let db = this.connection.db('forums');
+    return await db.collection('categories').find().toArray();
   }
 
-  getThreads(ids: number[]): Promise<Thread[]> {
-    return new Promise<Thread[]>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let threads = db.collection('threads');
-      threads.find({id: {$in: ids}}).toArray().then((threads: any[]) => {
-        if (threads) resolve(threads as Thread[]);
-        else reject('Threads not found');
-      }).catch(reject);
-    });
+  async getCategory(id: number) {
+    let category = this.connection.db('forums').collection('categories').findOne({ id: id });
+    if (!category) throw new CategoryNotFoundError(id);
+    return category;
+  }
+  async getThread(id: number) {
+    let thread = this.connection.db('forums').collection('threads').findOne({ id: id });
+    if (!thread) throw new ThreadNotFoundError(id);
+    return thread;
+  }
+  async getPost(id: number) {
+    let post = this.connection.db('forums').collection('posts').findOne({ id: id });
+    if (!post) throw new PostNotFoundError(id);
+    return post;
+  }
+
+  async getThreads(category: number) {
+    return await this.connection.db('forums').collection('threads').find({ id: { category: category } }).toArray();
   };
 
-  getPosts(ids: number[]): Promise<Post[]> {
-    return new Promise<Post[]>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let posts = db.collection('posts');
-      posts.find({id: {$in: ids}}).toArray().then((posts: any[]) => {
-        if (posts) resolve(posts as Post[]);
-        else reject('Posts not found');
-      }).catch(reject);
-    });
+  async getPosts(thread: number) {
+    return await this.connection.db('forums').collection('posts').find({ thread: thread }).toArray();
   }
 
-  insertUser(user: User): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let users = db.collection('user');
-      users.insertOne(user).then(() => {
-        resolve();
-      }).catch(reject);
-    });
+  async insertUser(user: User) {
+    await this.connection.db('forums').collection('user').insertOne(user);
   }
 
-  getNextId(type: string): Promise<number> {
-    return new Promise<number>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let ids = db.collection('ids');
-      ids.findOneAndUpdate({type: type}, [{$inc: {current: 1}}, {upsert: true}]).then((result: FindAndModifyWriteOpResultObject) => {
-        if (result.value && result.value.current) {
-          resolve(result.value.current);
-        } else reject('No result found');
-      }).catch(reject);
-    });
-  }
-  getUserByEmail(email: string): Promise<User> {
-      return new Promise<User>((resolve, reject) => {
-        let db = this.connection.db('forums');
-        let users = db.collection('users');
-        users.findOne({email: email}).then((u: any) => {
-          if (u) resolve(u as User);
-          else reject('User does not exist');
-        });
-      });
+  async getNextId(type: IDType) {
+    let res = await this.connection.db('forums').collection('ids').findOneAndUpdate({ type: type }, [{ $inc: { current: 1 } }, { upsert: true }]);
+    return res.value.current;
   }
 
-  getUserById(id: number): Promise<User> {
-    return new Promise<User>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let users = db.collection('users');
-      users.findOne({id: id}).then((u: any) => {
-        if (u) resolve(u as User);
-        else reject('User does not exist');
-      }).catch(reject);
-    });
+  async getUser(query: Object) {
+    let user = await this.connection.db('forums').collection('users').findOne(query);
+    if (!user) throw new UserNotFoundError(Object.values(query)[0]);
+    return user;
   }
 
-  getUsersById(ids: number[]): Promise<User[]> {
-    return new Promise<User[]>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let users = db.collection('users');
-      users.find({id: {$in: ids}}).toArray().then((users: any[]) => {
-        resolve(users as User[]);
-      }).catch(reject);
-    });
-  }
-
-  getUserByName(name: string): Promise<User> {
-    return new Promise<User>((resolve, reject) => {
-      let db = this.connection.db('forums');
-      let users = db.collection('users');
-      users.findOne({username: name}).then((u: any) => {
-        if (u) resolve(u as User);
-        else reject('User does not exist');
-      }).catch(reject);
-    });
-  }
+  getUserByEmail = (email: string) => this.getUser({email: email});
+  getUserById = (id: number) => this.getUser({id: id});
+  getUserByName = (name: string) => this.getUser({username: name})
 }

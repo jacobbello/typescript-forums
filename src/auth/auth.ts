@@ -1,41 +1,48 @@
-import { User, getDatabase, Database } from "../database/database";
+import { User, db, Database, UserNotFoundError } from "../database/database";
 import {hash, compare} from "bcrypt";
 
-let db: Database;
-
-export function login(username: string, password: string): Promise<User> {
-  db = getDatabase();
-  return new Promise<User>((resolve, reject) => {
-    db.getUserByName(username).then((u: User) => {
-      compare(password, u.password).then((result: boolean) => {
-        if (result) resolve(u);
-        else reject('Invalid login');
-      }).catch(reject);
-    }).catch(reject);
-  });
+export class InvalidLoginError extends Error {
+  constructor() {
+    super('Invalid login credentials')
+  }
 }
 
-export function register(username: string, password: string, email: string): Promise<User> {
-  db = getDatabase();
-  return new Promise<User>((resolve, reject) => {
-    db.getUserByName(username).then((u: User) => {
-      reject('User already exists');
-    }).catch((reason: any) => {
-      if (reason == 'User does not exist') {
-        hash(password, 10).then((hash: string) => {
-          db.getNextId('user').then((id) => {
-            let user: User = {
-              username: username,
-              password: hash,
-              email: email,
-              id: id
-            } as User;
-            db.insertUser(user).then(() => {
-              resolve(user);
-            }).catch(reject);
-          }).catch(reject);
-        }).catch(reject);
-      } else reject(reason);
-    });
-  });
+export class UserExistsError extends Error {
+  constructor(query) {
+    super(`User already exists: $(query)`);
+  }
+}
+
+export async function login(username: string, password: string): Promise<User> {
+  let user = await db.getUserByName(username);
+  if (await compare(password, user.password)) return user;
+  throw new InvalidLoginError();
+}
+
+export async function register(username: string, password: string, email: string): Promise<User> {
+  try {
+    let user = db.getUserByName(username);
+    throw new UserExistsError(username);
+  } catch(e) {
+    if (!(e instanceof UserNotFoundError)) throw e;
+  }
+
+  try {
+    let user = db.getUserByEmail(email);
+    throw new UserExistsError(email);
+  } catch(e) {
+    if (!(e instanceof UserNotFoundError)) throw e;
+  }
+
+  let hashed = await hash(password, 10);
+  let id = await db.getNextId('user');
+  let user = {
+    username: username,
+    password: hashed,
+    email: email,
+    id: id,
+    authentication: 0
+  };
+  await db.insertUser(user);
+  return user;
 }

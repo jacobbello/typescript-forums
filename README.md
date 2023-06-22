@@ -8,3 +8,5 @@ Todo
 - Installation Panel
 - Unit Tests
 - Plugin Framework
+- Localization
+- Readable Error logs

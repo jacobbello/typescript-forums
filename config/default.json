@@ -1,7 +1,7 @@
 {
   "port": 8000,
   "database": {
-    "type": "memory",
+    "type": "mongo",
     "username": "",
     "password": "",
     "url": "",
