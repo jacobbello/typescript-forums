@@ -20,10 +20,12 @@ categoryRouter.get('/:categoryId', categoryValidator(), async (req, res, next) =
     let r = validationResult(req);
     if (r.isEmpty()) {
         try {
-            let category = await db.getCategory(req.params.categoryId);
-            let threads = await db.getThreads(category.threads);
+            let id = parseInt(req.params.categoryId);
+            let category = await db.getCategory(id);
+            let threads = await db.getThreads(category.id);
             res.render('category', { category: category, threads: threads });
         } catch (e) {
+            console.log(e);
             if (e instanceof CategoryNotFoundError) next();
             else next(e);
         }
@@ -35,7 +37,7 @@ categoryRouter.post('/create', body('name').exists().isAscii(), body('descriptio
     if (r.isEmpty()) {
         try {
             let id = await db.getNextId('category');
-            await db.insertCategory({ id: id, name: req.body.name, description: req.body.description, threads: [] });
+            await db.insertCategory({ id: id, name: req.body.name, description: req.body.description });
             sendSuccess(res)
         } catch (e) {
             console.error(e);

@@ -1,8 +1,29 @@
 extends layout
 
 block content
-  ul#categories
+  button.btn.btn-primary(type='button', data-toggle='modal', data-target='#createcategory') Create Category
+  #categories
     each category in categories
-      li.category
-        a.category-title(href='#')= category.name
-        p.category-description= category.description
+      .card.category
+        .card-body
+          a.card-title(href='/category/' + category.id)= category.name
+          p.card-text= category.description
+  .modal.fade#createcategory(tabindex='-1', role='dialog', aria-hidden='true')
+    .modal-dialog(role='document')
+      .modal-content
+        .modal-header
+          h5.modal-title New Category
+        .modal-body
+          .alert.alert-danger(style='display: none;')#categoryerror
+          form#newcategory
+            .form-group
+              label(for='categoryname') Name
+              input.form-control#categoryname(type='text' placeholder='Category name', name='name')
+            .form-group
+              label(for='categorydesc') Description
+              textarea.form-control#categorydesc(name='description')
+            button.btn.btn-primary(type='submit') Submit
+        .modal-footer
+          button.btn.btn-secondary(type='button' data-dismiss='modal') Cancel
+block scripts
+  script(src='js/category.js')

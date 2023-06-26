@@ -3,8 +3,8 @@ extends layout
 block content
   h3.category-header=category.name
   h5.category-description=category.descriptoin
-  ul#threads
+  #threads
     each thread in threads
-      li.thread
-        a.thread-title(href='#')=thread.title
-        p.thread-author=thread.authorName
+      .card.thread
+        .card-body
+          a.card-title(href='/thread/' + thread.id)= thread.title

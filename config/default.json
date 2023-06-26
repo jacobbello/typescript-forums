@@ -1,10 +1,10 @@
 {
   "port": 8000,
   "database": {
-    "type": "mongo",
-    "username": "",
-    "password": "",
-    "url": "",
-    "poolSize": 10
+    "type": "memory",
+    "options": {
+      "poolSize": 10
+    }
   }
 }
+ 

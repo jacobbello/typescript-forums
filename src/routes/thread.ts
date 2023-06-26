@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { body, param, validationResult } from "express-validator";
-import { db } from "../database/database";
-import { sendError } from "../error/error";
+import { ThreadNotFoundError, db } from "../database/database";
+import { sendError, sendSuccess } from "../error/error";
 
 const threadRouter = Router();
 
@@ -11,11 +11,11 @@ threadRouter.get('/:threadId', threadValidator(), async (req, res, next) => {
     let r = validationResult(req);
     if (r.isEmpty()) {
         try {
-            let threads = await db.getThreads([req.params.threadId]);
-            if (threads.length == 0) next(); // Pass to 404 handler
-            res.render('thread', { thread: threads[0] });
+            let thread = await db.getThread(req.params.threadId);
+            res.render('thread', { thread: thread });
         } catch (e) {
-            next(e);
+            if (e instanceof ThreadNotFoundError) next();
+            else next(e);
         }
     } else next();
 });
@@ -33,24 +33,26 @@ threadRouter.post('/create', body('title').exists().isAscii(), body('content').e
                 title: req.body.title,
                 id: threadId,
             });
-            
-
+            sendSuccess(res);
         } catch(e) {
             sendError(res, 'Error creating thread');
             console.error(e);
         }
-        db.getNextId('thread').then(id => {
-            db.insertThread
-            return id;
-        }).then(id => {
-
-        })
-
     } else sendError(res, "You must include a title and body");
 });
 
-threadRouter.post('/delete/:threadId', threadValidator(), (req, res) => {
-
+threadRouter.post('/delete/:threadId', threadValidator(), async (req, res) => {
+    let r = validationResult(req);
+    if (r.isEmpty()) {
+        try {
+            let thread = await db.getThread(req.params.threadId);
+            await db.deleteThread(thread.id);
+            sendSuccess(res);
+        } catch(e) {
+            sendError(res, 'Error deleting thread');
+            console.error(e);
+        }
+    }
 });
 
 export default threadRouter;

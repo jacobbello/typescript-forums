@@ -5,7 +5,7 @@ import { User } from '../database/database';
 
 const authRouter = Router();
 
-authRouter.post('/auth/login', (req, res) => {
+authRouter.post('/login', (req, res) => {
   if (req.body && req.body.username && req.body.password) {
     login(req.body.username, req.body.password).then((user: User) => {
       req.session.login = user.id;
@@ -22,7 +22,7 @@ authRouter.post('/auth/login', (req, res) => {
 });
 
 
-authRouter.post('/auth/register', (req, res) => {
+authRouter.post('/register', (req, res) => {
   if (req.body && req.body.username && req.body.password && req.body.email) {
     register(req.body.username, req.body.password, req.body.email).then((user: User) => {
       req.session.login = user.id;

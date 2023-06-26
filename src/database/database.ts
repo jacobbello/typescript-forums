@@ -1,6 +1,7 @@
 export interface Database {
     //Should all return string 'User does not exist'
-    connect: (DatabaseOptions) => Promise<void>;
+    connect: () => Promise<void>;
+    disconnect: () => Promise<void>;
     getUserById: (id: number) => Promise<User>;
     getUserByName: (name: string) => Promise<User>;
     getUserByEmail: (email: string) => Promise<User>;
@@ -54,16 +55,6 @@ export class PostNotFoundError extends Error {
   }
 }
 
-export interface DatabaseOptions {
-  type: string,
-  url: string,
-  port: number,
-  database: string,
-  username: string,
-  password: string,
-  poolSize: number
-}
-
 export interface User {
   username: string;
   password: string;
@@ -76,7 +67,6 @@ export interface Post {
   content: string;
   id: number;
   author: number;
-  authorName: string;
   thread: number;
 }
 
@@ -85,13 +75,11 @@ export interface Thread {
   author: number;
   category: number;
   title: string;
-  posts: number[] //Array of post ids
 }
 
 export interface Category {
   name: string;
   description: string;
-  threads: number[]; // Number of threads in category
   id: number;
 }
 

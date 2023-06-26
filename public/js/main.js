@@ -3,21 +3,25 @@ index = 0;
 
 $(document).ready(function() {
   $('#register').hide();
+  $('#register-submit').hide();
   $('#login-toggle').click(function() {
     index = 1-index;
     $('#login-toggle').text(texts[index]);
     if (index) {
       $('#login').hide();
+      $('#login-submit').hide();
       $('#register').show();
+      $('#register-submit').show();
     } else {
       $('#login').show();
+      $('#login-submit').show();
       $('#register').hide();
+      $('#register-submit').hide();
     }
   });
   $("#login").submit(function(e) {
     e.preventDefault(true);
-    $.post('/auth/login', $(this).serialize(), function(data) {
-      response = JSON.serialize(data);
+    $.post('/auth/login', $(this).serialize(), function(response) {
       if (response['success']) {
         location.reload();
       } else {
@@ -25,10 +29,12 @@ $(document).ready(function() {
       }
     });
   });
+  $('#login-submit').click((e) => $('#login').submit());
+  $('#register-submit').click((e) => $('#register').submit());
 
   $("#register").submit(function(e) {
     e.preventDefault(true);
-    $.post('/auth/register', $(this).serialize(), function(data) {
+    $.post('/auth/register', $(this).serialize(), function(response) {
       if (response['success']) {
         location.reload();
       } else {

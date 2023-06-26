@@ -14,21 +14,28 @@ export class UserExistsError extends Error {
 }
 
 export async function login(username: string, password: string): Promise<User> {
-  let user = await db.getUserByName(username);
+  try {
+    let user = await db.getUserByName(username);
   if (await compare(password, user.password)) return user;
+  } catch(e) {
+    if (!(e instanceof UserNotFoundError)) {
+      console.error(e);
+      throw e;
+    }
+  }
   throw new InvalidLoginError();
 }
 
 export async function register(username: string, password: string, email: string): Promise<User> {
   try {
-    let user = db.getUserByName(username);
+    let user = await db.getUserByName(username);
     throw new UserExistsError(username);
   } catch(e) {
     if (!(e instanceof UserNotFoundError)) throw e;
   }
 
   try {
-    let user = db.getUserByEmail(email);
+    let user = await db.getUserByEmail(email);
     throw new UserExistsError(email);
   } catch(e) {
     if (!(e instanceof UserNotFoundError)) throw e;

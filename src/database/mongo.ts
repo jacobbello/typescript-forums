@@ -1,11 +1,21 @@
-import { Database, User, Post, Thread, Category, DatabaseOptions, UserNotFoundError, CategoryNotFoundError, IDType, ThreadNotFoundError, PostNotFoundError } from './database';
+import { Database, User, Post, Thread, Category, UserNotFoundError, CategoryNotFoundError, IDType, ThreadNotFoundError, PostNotFoundError } from './database';
 import { MongoClient, FindAndModifyWriteOpResultObject } from 'mongodb';
 
 export class Mongo implements Database {
   connection: MongoClient;
+  uri: string;
 
-  async connect(options: DatabaseOptions) {
-    this.connection = await MongoClient.connect(options.url, options);
+  constructor(uri: string) {
+    console.log(uri);
+    this.uri = uri;
+  }
+
+  async connect() {
+    this.connection = await MongoClient.connect(this.uri);
+  }
+
+  async disconnect() {
+    await this.connection.close();
   }
 
   async deleteThread(id: number) {
