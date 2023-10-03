@@ -36,8 +36,7 @@ categoryRouter.post('/create', body('name').exists().isAscii(), body('descriptio
     let r = validationResult(req);
     if (r.isEmpty()) {
         try {
-            let id = await db.getNextId('category');
-            await db.insertCategory({ id: id, name: req.body.name, description: req.body.description });
+            await db.insertCategory({ id: -1, name: req.body.name, description: req.body.description });
             sendSuccess(res)
         } catch (e) {
             console.error(e);

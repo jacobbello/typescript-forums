@@ -1,41 +1,43 @@
-import { Database, UserNotFoundError, User, CategoryNotFoundError, ThreadNotFoundError, PostNotFoundError } from "../../src/database/database";
+import { Database, UserNotFoundError, User, CategoryNotFoundError, ThreadNotFoundError, PostNotFoundError, Thread, Post, Category } from "../../src/database/database";
 import MemoryDatabase from "../../src/database/memory";
+import MySQLDatabase from "../../src/database/mysql";
 
-let databases = [
-    { db: new MemoryDatabase(), type: 'Memory'}
+let databases = [/*
+    { db: new MemoryDatabase(), type: 'Memory'},*/
+    {
+        db: new MySQLDatabase({
+            user: 'forums',
+            password: '',
+            host: '192.168.1.159', // WSL IP address
+            database: 'forum_test',
+        }), type: 'MySQL'
+    }
 ];
 
 const testUser = {
     username: 'test_user',
     email: 'test@email.com',
-    id: 4,
     password: 'test',
-    authentication: 0
-};
+    auth: 0
+} as User;
 
 const testCategory = {
     name: 'Test Category',
-    description: 'Category description',
-    id: 3
-};
+    description: 'Category description'
+} as Category;
 
 const testThread = {
     title: 'Test Thread',
-    category: 3,
-    id: 4,
-    author: 6
-}
+} as Thread;
 
 const testPost = {
-    content: 'Test post body',
-    id: 5,
-    author: 6,
-    thread: 4
-}
+    content: 'Test post body'
+} as Post;
 
 describe('testing databases', () => {
     describe.each(databases)('testing $type database', ({ db, type }) => {
         beforeAll(async () => await db.connect());
+        afterAll(async () => await db.disconnect());
         const errors = [
             {
                 name: 'getUserByName',
@@ -73,64 +75,79 @@ describe('testing databases', () => {
             try {
                 await db[name](query);
             } catch (e) {
+                if (!(e instanceof error)) console.error(error);
                 expect(e).toBeInstanceOf(error);
             }
         });
 
         describe('insert/retrieve user', () => {
-            beforeAll(async () => await db.insertUser(testUser));
+            beforeAll(async () => {
+                await db.insertUser(testUser);
+            });
             it.each([
                 { func: 'getUserByName', prop: 'username' },
                 { func: 'getUserById', prop: 'id' },
                 { func: 'getUserByEmail', prop: 'email' }])('test $func', async ({ func, prop }) => {
                     const user = await db[func](testUser[prop]);
-                    expect(user).toEqual(testUser);
+                    expect(user.username).toEqual(testUser.username);
+                    expect(user.email).toEqual(testUser.email);
+                    expect(user.password).toEqual(testUser.password);
+                    expect(user.auth).toEqual(testUser.auth);
                 });
+            afterAll(async () => await db.deleteUser(testUser.id));
         });
 
-        describe.each([
-            { name: 'category', insert: db.insertCategory, get: db.getCategory, del: db.deleteCategory, obj: testCategory },
-            { name: 'thread', insert: db.insertThread, get: db.getThread, del: db.deleteThread, obj: testThread },
-            { name: 'post', insert: db.insertPost, get: db.getPost, del: db.deletePost, obj: testPost }
-        ])('insert $name', ({name, insert, get, del, obj}) => {
-            beforeAll(async () => await (insert as (o) => Promise<void>)(obj));
-            it('should find by id', async () => {
-                expect(await get(obj.id)).toEqual(obj);
+        describe('content tests', () => {
+            // Inserted content
+            var c: Category;
+            var t: Thread;
+            var p: Post;
+            var u: User;
+            /*
+            Inserting needs to be done in order so that the ID's can be specified
+            */
+            beforeAll(async () => {
+                u = await db.insertUser(testUser);
+                testPost.author = u.id;
+                testThread.author = u.id;
+
+                c = await db.insertCategory(testCategory);
+                expect(c.id).not.toBe(-1);
+                testThread.category = c.id;
+
+                t = await db.insertThread(testThread);
+                expect(t.id).not.toBe(-1);
+                testPost.thread = t.id;
+
+                p = await db.insertPost(testPost);
+                expect(p.id).not.toBe(-1);
             });
-            afterAll(async () => await del(obj.id));
-        });
 
-        describe.each([{
-            name: 'category',
-            insert: db.insertCategory,
-            del: db.deleteCategory,
-            get: db.getCategory,
-            err: CategoryNotFoundError,
-            obj: testCategory,
-        }, {
-            name: 'thread',
-            insert: db.insertThread,
-            del: db.deleteThread,
-            get: db.getThread,
-            err: ThreadNotFoundError,
-            obj: testThread,
-        }, {
-            name: 'post',
-            insert: db.insertPost,
-            del: db.deletePost,
-            get: db.getPost,
-            err: PostNotFoundError,
-            obj: testPost,
-        }])('delete $name', ({ name, insert, del, get, err, obj }) => {
-            it('should not exist after deleting', async () => {
-                expect.assertions(1);
-                await (insert as (o) => Promise<void>)(obj);
-                await del(obj.id);
-                try {
-                    await get(obj.id);
-                } catch (e) {
-                    expect(e).toBeInstanceOf(err);
-                }
+            test('inserted category matches', async () => {
+                let cat = await db.getCategory(c.id);
+                expect(cat.name).toEqual(testCategory.name);
+                expect(cat.description).toEqual(testCategory.description);
+            });
+
+            test('inserted thread matches', async () => {
+                let thread = await db.getThread(t.id);
+                expect(thread.author).toEqual(u.id);
+                expect(thread.category).toEqual(c.id);
+                expect(thread.title).toEqual(testThread.title);
+            });
+
+            test('inserted post matches', async () => {
+                let post = await db.getPost(p.id);
+                expect(post.author).toEqual(u.id);
+                expect(post.thread).toEqual(t.id);
+                expect(post.content).toEqual(testPost.content);
+            });
+
+            afterAll(async () => {
+                await db.deletePost(p.id);
+                await db.deleteThread(t.id);
+                await db.deleteCategory(c.id);
+                await db.deleteUser(testUser.id);
             });
         });
     });

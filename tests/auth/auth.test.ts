@@ -7,7 +7,7 @@ const testUser = {
     email: 'test@email.com',
     id: 4,
     password: 'test',
-    authentication: 0
+    auth: 0
 };
 
 let db = new MemoryDatabase();

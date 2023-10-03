@@ -1,43 +1,53 @@
-import {Router} from 'express';
-import {InvalidLoginError, UserExistsError, login, register} from '../auth/auth';
+import { Router } from 'express';
+import { InvalidLoginError, UserExistsError, login, loginEmail, register } from '../auth/auth';
 import { sendSuccess, sendError } from '../error/error';
-import { User } from '../database/database';
+import { User, UserNotFoundError } from '../database/database';
 
 const authRouter = Router();
 
-authRouter.post('/login', (req, res) => {
-  if (req.body && req.body.username && req.body.password) {
-    login(req.body.username, req.body.password).then((user: User) => {
+/**
+ * Handles JSON login requests
+ * POST to /auth/login with body params
+ * email or username and password
+ */
+authRouter.post('/login', async (req, res) => {
+  if (req.body && (req.body.username || req.body.email) && req.body.password) {
+    try {
+      let user = await (req.body.username ? login(req.body.username, req.body.password)
+        : loginEmail(req.body.email, req.body.password));
       req.session.login = user.id;
       sendSuccess(res);
-    }).catch((reason: any) => {
-      if (reason instanceof InvalidLoginError) {
-        sendError(res, reason.message);
-      } else {
-        sendError(res, "Unknown error logging in");
-        console.error(reason);
-      }
-    });
+    } catch (e) {
+      let invalid = e instanceof InvalidLoginError || e instanceof UserNotFoundError;
+      sendError(res, invalid ? 'Invalid login' : 'Unknown error logging in');
+      if (!invalid) console.error(invalid);
+    }
   } else sendError(res, 'Must specify a username and password');
 });
 
-
-authRouter.post('/register', (req, res) => {
+/**
+ * Handles JSON register requests
+ * POST to /auth/register with body params
+ * username, password, email
+ */
+authRouter.post('/register', async (req, res) => {
   if (req.body && req.body.username && req.body.password && req.body.email) {
-    register(req.body.username, req.body.password, req.body.email).then((user: User) => {
+    try {
+      let user = await register(req.body.username, req.body.password, req.body.email);
       req.session.login = user.id;
       sendSuccess(res);
-    }).catch((reason: any) => {
-      if (reason instanceof UserExistsError) sendError(res, reason.message);
+    } catch (e) {
+      if (e instanceof UserExistsError) sendError(res, 'User already exists');
       else {
-        sendError(res, "Unknown error creating account");
-        console.error(reason);
+        sendError(res, 'Unknown error creating account');
+        console.error(e);
       }
-    });
-  } else sendError(res, 'You must enter a username, email, and password');
+    }
+  }
 });
 
-authRouter.post('/auth/logout', (req, res) => {
+/** Post to /auth/logout to sign out - JSON response */
+authRouter.post('/logout', (req, res) => {
   if (req.session.login) delete req.session.login;
   sendSuccess(res);
 });

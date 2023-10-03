@@ -1,10 +1,17 @@
 import { Database, User, Post, Thread, Category, UserNotFoundError, CategoryNotFoundError, IDType, ThreadNotFoundError, PostNotFoundError } from './database';
 import { MongoClient, FindAndModifyWriteOpResultObject } from 'mongodb';
 
-export class Mongo implements Database {
+/**
+ * Implementation of {Database} using MongoDB
+ */
+export class MongoDatabase implements Database {
   connection: MongoClient;
   uri: string;
 
+  /**
+   * Initialize using given parameters
+   * @param uri Connection URI
+   */
   constructor(uri: string) {
     console.log(uri);
     this.uri = uri;
@@ -39,6 +46,7 @@ export class Mongo implements Database {
   }
 
   async insertCategory(category: Category) {
+    category.id = await this.getNextId('category');
     await this.connection.db('forums').collection('categories').insertOne(category);
   }
 
@@ -51,6 +59,7 @@ export class Mongo implements Database {
   }
 
   async insertPost(post: Post) {
+    post.id = await this.getNextId('post');
     let db = this.connection.db('forums');
     let posts = db.collection('posts');
     await posts.insertOne(post);
@@ -88,6 +97,7 @@ export class Mongo implements Database {
   }
 
   async insertUser(user: User) {
+    user.id = await this.getNextId('user');
     await this.connection.db('forums').collection('user').insertOne(user);
   }
 
@@ -96,6 +106,7 @@ export class Mongo implements Database {
     return res.value.current;
   }
 
+  // Helper function to lookup user
   async getUser(query: Object) {
     let user = await this.connection.db('forums').collection('users').findOne(query);
     if (!user) throw new UserNotFoundError(Object.values(query)[0]);

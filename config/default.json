@@ -2,6 +2,7 @@
   "port": 8000,
   "database": {
     "type": "memory",
+    "filename": "db.tmp",
     "options": {
       "poolSize": 10
     }

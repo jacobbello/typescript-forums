@@ -1,31 +1,127 @@
+/**
+ * Represents a database holding user and forum data
+ * @interface Database
+ */
 export interface Database {
-    //Should all return string 'User does not exist'
+    /**
+     * Connects to the database
+     * @returns {Promise<void>}
+     */
     connect: () => Promise<void>;
+    /**
+     * Closes the active database connection
+     * @returns {Promise<void>}
+     */
     disconnect: () => Promise<void>;
+    /**
+     * 
+     * @param id User ID
+     * @returns {Promise<User>} 
+     * @throws {UserNotFoundError}
+     */
     getUserById: (id: number) => Promise<User>;
+    /**
+     * 
+     * @param name Username
+     * @returns {Promise<User>} 
+     * @throws {UserNotFoundError}
+     */
     getUserByName: (name: string) => Promise<User>;
+    /**
+     * 
+     * @param email User email
+     * @returns {Promise<User>} 
+     * @throws {UserNotFoundError}
+     */
     getUserByEmail: (email: string) => Promise<User>;
-    /*
-    IDS should start at 1
-    categories, threads, posts, users,
-    */
-    getNextId: (type: IDType) => Promise<number>;
-    insertUser: (user: User) => Promise<void>;
+    /**
+     * Save a user to the database. Should generate ID
+     * @param user user to insert
+     * @returns {Promise<void>}
+     */
+    insertUser: (user: User) => Promise<User>;
 
+    /**
+     * Delete a user from database
+     * @throws {UserNotFoundError}
+     * @param id Id of user to delete
+     * @returns {Promise<void>}
+     */
+    deleteUser: (id: number) => Promise<void>;
+
+    /**
+     * Fetch all posts in the given thread
+     * @param thread thread ID
+     * @returns {Promise<Post[]>} list of posts in thread
+     */
     getPosts: (thread: number) => Promise<Post[]>;
+    /**
+     * Fetch all threads in the given category
+     * @param category category ID
+     * @returns {Promise<Thread>} list of threads in category
+     */
     getThreads: (category: number) => Promise<Thread[]>;
+    /**
+     * Fetch all categories
+     * @returns {Promise<Category[]>} list of categories
+     */
     getCategories: () => Promise<Category[]>;
-
+    /**
+     * Look up a category
+     * @param id category id
+     * @returns {Promise<Category>}
+     * @throws {CategoryNotFoundError}
+     */
     getCategory: (id: number) => Promise<Category>;
+    /**
+     * Look up a thread
+     * @param id thread id
+     * @returns {Promise<Thread>}
+     * @throws {ThreadNotFoundError}
+     */
     getThread: (id: number) => Promise<Thread>;
+    /**
+     * Look up a post
+     * @param id post id
+     * @returns {Promise<Post>}
+     * @throws {PostNotFoundError}
+     */
     getPost: (id: number) => Promise<Post>;
-
-    insertPost: (post: Post) => Promise<void>;
-    insertThread: (thread: Thread) => Promise<void>;
-    insertCategory: (category: Category) => Promise<void>;
-
+    /**
+     * Save a post into the database
+     * @param post Post to insert
+     * @returns {Promise<void>}
+     */
+    insertPost: (post: Post) => Promise<Post>;
+    /**
+     * Save a thread into the database
+     * @param thread Thread to insert
+     * @returns {Promise<void>}
+     */
+    insertThread: (thread: Thread) => Promise<Thread>;
+    /**
+     * Save a category into the database
+     * @param category Category to insert
+     * @returns {Promise<void>}
+     */
+    insertCategory: (category: Category) => Promise<Category>;
+    /**
+     * Delete a post from the database
+     * @param id ID of post to delete
+     * @returns {Promise<void>}
+     */
     deletePost: (id: number) => Promise<void>;
+    /**
+     * Delete a thread from the database
+     * @param id ID of thread to delete
+     * @returns {Promise<void>}
+     */
     deleteThread: (id: number) => Promise<void>;
+    /**
+     * Delete a category from the database
+     * @param id ID of category to delete
+     * @returns {Promise<void>}
+     */
     deleteCategory: (id: number) => Promise<void>;
 }
 
@@ -60,7 +156,7 @@ export interface User {
   password: string;
   email: string;
   id: number;
-  authentication: number;
+  auth: number;
 }
 
 export interface Post {

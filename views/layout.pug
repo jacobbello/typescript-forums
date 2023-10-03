@@ -37,7 +37,7 @@ html(lang='en')
               span(aria-hidden='true') &times;
           .modal-body
             .alert.alert-danger(style='display: none;')#error
-            form#login
+            form#login.login
               input(type='hidden' name='_csrf', value=csrfToken)
               .form-group
                 label(for='username') Username
@@ -45,7 +45,7 @@ html(lang='en')
               .form-group
                 label(for='password') Password
                 input.form-control#password(type='password' placeholder='Password' name='password')
-            form#register
+            form#register.register
               input(type='hidden' name='_csrf', value=csrfToken)
               .form-group
                 label(for='username-r') Username
@@ -62,8 +62,8 @@ html(lang='en')
             a#login-toggle.link-primary(href='#') Don't have an account? Click here to register.
           .modal-footer
             button.btn.btn-secondary(type='button' data-dismiss='modal') Close
-            button.btn.btn-primary#register-submit(type='button') Register
-            button.btn.btn-primary#login-submit(type='button') Sign In
+            button.btn.btn-primary#register-submit.register(type='button') Register
+            button.btn.btn-primary#login-submit.login(type='button') Sign In
   block jumbotron
   .container
     block content
