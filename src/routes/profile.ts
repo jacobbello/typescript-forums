@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { UserNotFoundError, db } from '../database/database';
 import { param, validationResult } from 'express-validator';
 import { sendError, sendSuccess } from '../error/error';
+import { getUser } from './auth';
 
 const profileRouter = Router();
 const profileValidator = () => param('profileId').isInt().exists();
@@ -10,7 +11,7 @@ profileRouter.get('/', async (req, res, next) => {
     if (req.session.login) {
         try {
             let user = await db.getUserById(req.session.login);
-            res.render('profile', { user: user });
+            res.render('profile', { profile: user});
         } catch (e) {
             if (!(e instanceof UserNotFoundError)) console.error(e);
             res.redirect('/');
@@ -24,7 +25,7 @@ profileRouter.get('/:profileId', profileValidator(),
         if (r.isEmpty()) {
             try {
                 let user = await db.getUserById(parseInt(req.params.profileId));
-                res.render('profile', {user: user});
+                res.render('profile', {profile: user});
             } catch (e) {
                 if (!(e instanceof UserNotFoundError)) console.error(e);
                 next();

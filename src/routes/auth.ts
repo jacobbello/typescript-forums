@@ -5,6 +5,10 @@ import { User, UserNotFoundError } from '../database/database';
 
 const authRouter = Router();
 
+export function getUser(req: Express.Request) {
+  return req.session ? req.session.login : null;
+}
+
 /**
  * Handles JSON login requests
  * POST to /auth/login with body params

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { Category, CategoryNotFoundError, db } from "../database/database";
 import { body, param, validationResult } from "express-validator";
 import { sendError, sendSuccess } from "../error/error";
+import { getUser } from "./auth";
 
 const categoryRouter = Router();
 const categoryValidator = () => param('categoryId').exists().isInt();
@@ -9,7 +10,7 @@ const categoryValidator = () => param('categoryId').exists().isInt();
 categoryRouter.get('/', async (req, res, next) => {
     try {
         let categories = await db.getCategories();
-        res.render('categories', { categories: categories });
+        res.render('categories', { categories: categories});
     } catch (e) {
         next(e);
     }
@@ -23,7 +24,7 @@ categoryRouter.get('/:categoryId', categoryValidator(), async (req, res, next) =
             let id = parseInt(req.params.categoryId);
             let category = await db.getCategory(id);
             let threads = await db.getThreads(category.id);
-            res.render('category', { category: category, threads: threads });
+            res.render('category', { category: category, threads: threads});
         } catch (e) {
             console.log(e);
             if (e instanceof CategoryNotFoundError) next();

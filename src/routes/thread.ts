@@ -12,7 +12,7 @@ threadRouter.get('/:threadId', threadValidator(), async (req, res, next) => {
     if (r.isEmpty()) {
         try {
             let thread = await db.getThread(req.params.threadId);
-            res.render('thread', { thread: thread });
+            res.render('thread', { thread: thread});
         } catch (e) {
             if (e instanceof ThreadNotFoundError) next();
             else next(e);

@@ -26,7 +26,7 @@ $(() => {
     });
     $('#login').on('submit', (e) => __awaiter(this, void 0, void 0, function* () {
         e.preventDefault();
-        $.post('auth/login', $('#login').serialize(), (response) => {
+        $.post('/auth/login', $('#login').serialize(), (response) => {
             if (response.success)
                 location.reload();
             else {

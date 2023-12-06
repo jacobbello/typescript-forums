@@ -2,11 +2,10 @@ Typescript Forums
 Forum software using node.js, express, and Typescript
 
 Todo
-- Post/Thread creation
+- Post/Thread creation frontend
 - Captcha
 - Admin Panel
 - Installation Panel
-- Unit Tests
 - Plugin Framework
 - Localization
 - Readable Error logs

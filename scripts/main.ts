@@ -19,7 +19,7 @@ $(() => {
 
     $('#login').on('submit', async e => {
         e.preventDefault();
-        $.post('auth/login', $('#login').serialize(), (response) => {
+        $.post('/auth/login', $('#login').serialize(), (response) => {
             if (response.success) location.reload();
             else {
                 $('#error').text(response.error).fadeIn();
