@@ -1,5 +1,5 @@
 import { Category, CategoryNotFoundError, Database, IDType, Post, PostNotFoundError, Thread, ThreadNotFoundError, User, UserNotFoundError } from "./database";
-import * as mysql from "mysql";
+import * as mysql from "mysql2";
 import * as util from "util";
 
 let setupQueries = [
@@ -38,14 +38,14 @@ let setupQueries = [
  * Implementation of {Database} using MySQL
  */
 export default class MySQLDatabase implements Database {
-    options: string | mysql.PoolConfig;
+    options: mysql.PoolOptions;
     con: mysql.Pool;
 
     /**
      * Initialize MySQL database
      * @param options see {@link mysql.createPool}
      */
-    constructor(options: string | mysql.PoolConfig) {
+    constructor(options: mysql.PoolOptions) {
         this.options = options;
     }
 

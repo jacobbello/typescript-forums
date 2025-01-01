@@ -28,7 +28,9 @@ export default class MemoryDatabase implements Database {
         if (this.filename && fs.existsSync(this.filename)) {
             let saved = JSON.parse(fs.readFileSync(this.filename).toString());
             saved.users.forEach(u => this.users.set(u.id, u));
-            saved.categories.forEach(u => this.categories.set(u.id, u));
+            saved.categories.forEach(u => {
+                this.categories.set(u.id, u);
+            });
             saved.threads.forEach(u => this.threads.set(u.id, u));
             saved.posts.forEach(u => this.posts.set(u.id, u));
             this.id = saved.id;
@@ -86,8 +88,8 @@ export default class MemoryDatabase implements Database {
         if (!this.users.delete(id)) throw new UserNotFoundError(id);
     }
 
-    getPosts = async (thread: number) => Array.from(this.posts.values()).filter(p => p.id == thread);
-    getThreads = async (category: number) => Array.from(this.threads.values()).filter(t => t.id == category);
+    getPosts = async (thread: number) => Array.from(this.posts.values()).filter(p => p.thread == thread);
+    getThreads = async (category: number) => Array.from(this.threads.values()).filter(t => t.category == category);
     getCategories = async () => Array.from(this.categories.values());
     getCategory = async (id: number) => {
         if (!this.categories.has(id)) throw new CategoryNotFoundError(id);

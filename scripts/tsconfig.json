@@ -8,6 +8,6 @@
     "outDir": "../public/js"
   },
   "lib": ["es2015"],
-  "include": ["*"],
+  "include": ["*", "thread/editor.ts"],
   "exclude": []
 }

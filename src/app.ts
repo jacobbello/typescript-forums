@@ -1,3 +1,4 @@
+require('source-map-support').install();
 import MySQLDatabase from './database/mysql';
 import { setDatabase, Database } from './database/database';
 import express from 'express';

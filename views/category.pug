@@ -2,9 +2,10 @@ extends layout
 
 block content
   h3.category-header=category.name
-  h5.category-description=category.descriptoin
+  h5.category-description=category.description
+  a.btn.btn-primary(href='/thread/new?categoryId='+category.id) Create Thread
   #threads
     each thread in threads
       .card.thread
         .card-body
-          a.card-title(href='/thread/' + thread.id)= thread.title
+          a.card-title(href='/thread/view/' + thread.id)= thread.title

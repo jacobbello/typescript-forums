@@ -8,7 +8,7 @@ let databases = [/*
         db: new MySQLDatabase({
             user: 'forums',
             password: '',
-            host: '192.168.1.159', // WSL IP address
+            host: '192.168.56.1', // WSL IP address
             database: 'forum_test',
         }), type: 'MySQL'
     }

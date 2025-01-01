@@ -1,0 +1,46 @@
+@nav-inverse-bg: #007575;
+@nav-inverse-fg: white;
+@nav-inverse-bg-hover: darken(@nav-inverse-bg, 10%);
+@nav-inverse-fg-hover: darken(@nav-inverse-fg, 10%);
+
+.nav-inverse-bg-fg {
+    background-color: @nav-inverse-bg;
+    color: @nav-inverse-fg;
+}
+
+.nav-inverse-hover {
+    .nav-inverse-bg-fg();
+    &:hover {
+        background-color: @nav-inverse-bg-hover;
+        color: @nav-inverse-fg-hover;
+    }
+    &:active {
+        color: @nav-inverse-fg-hover;
+    }
+}
+
+.bg-inverse {
+    .nav-inverse-bg-fg()
+}
+
+.navbar-brand {
+    padding: .5rem 0rem;
+    margin-left: 1rem;
+    .nav-inverse-hover()
+}
+
+.navbar-inverse {
+    padding: 0px 5px;
+    .dropdown-menu {
+        .nav-inverse-bg-fg();
+        margin-top: -1px;
+    }
+    .nav-item, .dropdown-item, .nav-link {
+        .nav-inverse-hover();
+    }
+
+    .navbar-toggler:focus {
+        box-shadow: none;
+    }
+}
+

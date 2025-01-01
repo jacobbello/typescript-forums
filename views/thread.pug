@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  h3.post-header= title
+  h3.post-header= thread.title
   ul#posts
     each post in posts
       li.post
@@ -10,6 +10,6 @@ block content
             img(height='64', width='64')
             a(href='#').post-author= post.author
           .col-lg
-            p.post-body= post.body
+            p.post-body= post.content
   form#new-post
     textarea#post-content(name="", cols="30", rows="10") 

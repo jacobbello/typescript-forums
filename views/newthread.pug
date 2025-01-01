@@ -1,0 +1,16 @@
+extends layout 
+
+block content
+  form#editor
+    .form-group
+        label(for='posttitle') Title
+        input.form-control#posttitle(type='text' placeholder='Post title', name='title')
+    .form-group
+        label(for='postbody') Body
+        textarea.form-control#postbody(name='content')
+    input(type='hidden' name='category' value=category.id)
+    
+    button.btn.btn-primary(type='submit') Submit
+
+block scripts
+    script(src='/js/editor.js')
